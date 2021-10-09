@@ -5,6 +5,10 @@ from exceptions import BadInputException, TaskException, LogicException, AssertE
 from gauss import gauss_minimize, gauss
 
 
+# @author Geny200
+# @version 1.1
+# Sorry for the code, I don't write on python.
+
 def flip_matrix(matrix):
     # Some hack for reverse traversal
     for i in range(len(matrix[0])):
