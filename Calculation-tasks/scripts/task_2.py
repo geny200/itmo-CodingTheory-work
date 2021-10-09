@@ -20,8 +20,11 @@ def flip_matrix(matrix):
 def to_minimal_span_matrix(matrix):
     local_matrix = matrix.copy()
 
+    back_traverse = \
+        np.linalg.matrix_rank(local_matrix[:, :len(local_matrix)]) \
+        != len(local_matrix)
     for i in range(0, 2):
-        local_matrix = gauss_minimize(local_matrix)
+        local_matrix = gauss_minimize(local_matrix, back_traverse)
         flip_matrix(local_matrix)
 
     # Third step
@@ -121,12 +124,12 @@ def decode_word_by_H_matrix(matrix, word):
 
     code_word = list(map(lambda x, y: (x + y) % 2, list(word), list(syndrome[int(to_line(list(s)), 2)])))
 
-    print('logs:')
-    print(f'syndrom = {s}')
-    print(f'word = {word}')
-    print(f'T[s] = {syndrome[int(to_line(list(s)), 2)]}')
-    print(f'C    = {np.array(code_word, dtype=int)}')
-    print(f't    = {sum(x == 1 for x in syndrome[int(to_line(list(s)), 2)])}')
+    # print('logs:')
+    # print(f'syndrom = {s}')
+    # print(f'word = {word}')
+    # print(f'T[s] = {syndrome[int(to_line(list(s)), 2)]}')
+    # print(f'C    = {np.array(code_word, dtype=int)}')
+    # print(f't    = {sum(x == 1 for x in syndrome[int(to_line(list(s)), 2)])}')
     return code_word
 
 
