@@ -2,7 +2,7 @@ import numpy as np
 
 from common import to_line, hamming_weight, compare_same_weight, read_matrix
 from exceptions import BadInputException, TaskException, LogicException, AssertException
-from gauss import gauss_minimize
+from gauss import gauss_minimize, gauss
 
 
 def flip_matrix(matrix):
@@ -17,7 +17,7 @@ def to_minimal_span_matrix(matrix):
     local_matrix = matrix.copy()
 
     for i in range(0, 2):
-        local_matrix = gauss_minimize(local_matrix, False)
+        local_matrix = gauss_minimize(local_matrix)
         flip_matrix(local_matrix)
 
     # Third step
@@ -73,7 +73,8 @@ def get_log_Vi(matrix):
 # def decode_by_grid(matrix, word, )
 def find_H(matrix):
     local_matrix = matrix.copy()
-    local_matrix = gauss_minimize(local_matrix)
+    local_matrix, swap_buff = gauss(local_matrix)
+    swap_buff.reverse()
 
     a_t = local_matrix[:len(local_matrix), len(local_matrix):].copy()
 
@@ -81,6 +82,13 @@ def find_H(matrix):
     h_matrix = np.zeros([len(local_matrix), len(local_matrix[0])], dtype=int)
     h_matrix[:, :len(h_matrix)] = a_t.transpose()
     h_matrix[:, len(h_matrix):] = np.eye(len(h_matrix), len(h_matrix), dtype=int)
+
+    # Swap columns
+    for l, r in swap_buff:
+        copy = h_matrix[:, l].copy()
+        h_matrix[:, l] = h_matrix[:, r]
+        h_matrix[:, r] = copy
+
     return h_matrix
 
 
@@ -146,7 +154,7 @@ def rz_task_(file_name_matrix, file_name_word):
     log_Vi = get_log_Vi(span_matrix)
 
     if word and word[0]:
-        h_matrix = find_H(span_matrix)
+        h_matrix = find_H(g_matrix)
         c = decode_word_by_H_matrix(h_matrix, np.array(word[0], dtype=int))
         return log_Vi, c
     else:
