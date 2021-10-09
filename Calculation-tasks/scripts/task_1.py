@@ -1,41 +1,12 @@
 import numpy as np
 
+from common import to_line, hamming_weight, hamming_dist, compare_same_weight, read_matrix
+from gauss import gauss, gauss_minimize
+
 
 # @author Geny200
 # @version 3.8
 # Sorry for the code, I don't write on python.
-
-def to_line(line, place_word=''):
-    return place_word.join(str(x) for x in list(line))
-
-
-def compare_same_weight(left, right):
-    for l, r in zip(left, right):
-        if l > r:
-            return left
-        elif r > l:
-            return right
-        else:
-            continue
-
-
-# Calculate number of '1'.
-def hamming_weight(word):
-    result = 0
-    for i in word:
-        if i > 0:
-            result += 1
-    return result
-
-
-# Calculate number of different digit in
-# the same position.
-def hamming_dist(left, right):
-    result = 0
-    for l, r in zip(left, right):
-        if l != r:
-            result += 1
-    return result
 
 
 # Makes index matching. (you can optimize up to one line)
@@ -52,123 +23,6 @@ def evaluate_num(n, swap_buff):
     return swap_buff
 
 
-# Find first "good" column in matrix ("good" -
-# means a non-zero value in the current line position;
-# column index > current_row)
-def find_column(matrix, current_row, current_column):
-    if not matrix.any():
-        return current_column
-
-    n = len(matrix[0])
-    if n <= current_column:
-        return current_column
-
-    for i in range(current_column, n):
-        if np.max(matrix[current_row:, i]) > 0:
-            return i
-    return current_column
-
-
-# Find first "good" line in matrix ("good" -
-# means a non-zero value in the current column
-# with the index "current_column"; row index > current_column)
-def find_row(matrix, current_line, current_column):
-    if not matrix.any():
-        return current_line
-
-    n = len(matrix)
-    if n <= current_line:
-        return current_line
-
-    for i in range(current_line, n):
-        if matrix[i, current_column] > 0:
-            return i
-
-    return current_line
-
-
-# Gaussian function for constructing a I matrix in place.
-def gauss(A):
-    swap_buff = []
-    for i in range(len(A)):
-        # print(f'-------{i}--------')
-        # print(A)
-        cur = find_column(A, i, i)
-        if cur != i:
-            # print(f'swap column - {i} {cur}')
-            swap_buff.append((i, cur))
-            copy = A[:, i].copy()
-            A[:, i] = A[:, cur]
-            A[:, cur] = copy
-            # print(A)
-        cur = find_row(A, i, i)
-        if cur != i:
-            # print(f'swap line - {i} {cur}')
-            copy = A[i].copy()
-            A[i] = A[cur]
-            A[cur] = copy
-            # print(A)
-
-        if i < len(A) - 1:
-            for k in range(i + 1, len(A)):
-                if A[k][i] > 0:
-                    # print(f'{k} - {i}')
-                    A[k] -= A[i]
-                    A[k] %= 2
-                    # print(f'{A}')
-
-    for i in range(len(A), 0, -1):
-        for k in range(i - 1, 0, -1):
-            if A[k - 1][i - 1] > 0:
-                # print(f'{k - 1} - {i - 1}')
-                A[k - 1] -= A[i - 1]
-                A[k - 1] %= 2
-                # print(f'{A}')
-
-    return A, swap_buff
-
-
-# Gaussian function for minimize.
-def gauss_minimize(A):
-    columns_i_matrix = []
-    column_i = 0
-    for i in range(len(A)):
-
-        cur = find_column(A, i, column_i)
-        if cur != i:
-            column_i = cur
-
-        cur = find_row(A, i, column_i)
-        if cur != i:
-            # print(f'swap line - {i} {cur}')
-            copy = A[i].copy()
-            A[i] = A[cur]
-            A[cur] = copy
-            # print(A)
-
-        if column_i < len(A) - 1:
-            for k in range(i + 1, len(A)):
-                if A[k][column_i] > 0:
-                    # print(f'{k} - {i}')
-                    A[k] -= A[i]
-                    A[k] %= 2
-        columns_i_matrix.append(column_i)
-        column_i += 1
-    columns_i_matrix.reverse()
-    # print('end')
-    # print(f'{columns_i_matrix}')
-    for order, column in zip(range(len(columns_i_matrix) - 1, -1, -1), columns_i_matrix):
-        for row in range(order, 0, -1):
-            if A[row - 1][column] > 0:
-                # print(f'{order}, {column}, {row}')
-                # print(f'{row - 1} - {order}')
-                A[row - 1] -= A[order]
-                A[row - 1] %= 2
-                # print(f'{A}')
-
-    return A
-
-
 # Makes the calculation of the generating matrix (G)
 # and related parameters (n and k).
 # This function takes into account the conditions of
@@ -176,13 +30,7 @@ def gauss_minimize(A):
 def rz_task(file_name):
     h_matrix = []
     with open(file_name, 'r') as reader:
-        for line in reader:
-            line = line.rstrip()
-            if h_matrix:
-                if len(line) != len(h_matrix[0]):
-                    print('err: This is not a matrix;')
-                    return
-            h_matrix.append(list(line))
+        h_matrix = read_matrix(reader)
 
     if not h_matrix or len(h_matrix) > len(h_matrix[0]):
         print('err: Smth wrong with matrix;')
@@ -301,4 +149,4 @@ def rz_task(file_name):
 
 # Evaluate task from file
 # !! Input file must not contain extra lines
-rz_task('data/input.txt')
+rz_task('data/task_1.txt')
