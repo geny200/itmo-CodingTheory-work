@@ -133,24 +133,10 @@ def decode_word_by_H_matrix(matrix, word):
     return code_word
 
 
-def rz_task_(file_name_matrix, file_name_word):
-    word = None
-    with open(file_name_matrix, 'r') as reader:
-        g_matrix = read_matrix(reader)
-
-    try:
-        with open(file_name_word, 'r') as reader:
-            word = read_matrix(reader)
-    except Exception as e:
-        print(f'warning: {e}')
-
-    if not g_matrix:
-        raise BadInputException(f'Matrix in file \'{file_name_matrix}\' not found')
-
+def rz_task_(g_matrix, word):
     if len(g_matrix) > len(g_matrix[0]):
         print('warning: Pls, check correctness of matrix (smth wrong);')
 
-    g_matrix = np.array(g_matrix, dtype=int)
     rank = np.linalg.matrix_rank(g_matrix)
 
     if rank != len(g_matrix):
@@ -165,15 +151,38 @@ def rz_task_(file_name_matrix, file_name_word):
         c = decode_word_by_H_matrix(h_matrix, np.array(word[0], dtype=int))
         return log_Vi, c
     else:
-        print(f'Word in file \'{file_name_word}\' not found')
+        print(f'warning: word \'Y\' not found')
         return log_Vi, []
 
 
 def main():
     # Evaluate task from file
+    file_name_matrix = 'data/task_2_matrix.txt'
+    file_name_word = 'data/task_2_word.txt'
+    sep = ' '
+
     try:
-        sep = ' '
-        log_Vi, c = rz_task_('data/task_2_matrix.txt', 'data/task_2_word.txt')
+        word = None
+        with open(file_name_matrix, 'r') as reader:
+            g_matrix = read_matrix(reader)
+
+        if not g_matrix:
+            raise BadInputException(f'Matrix in file \'{file_name_matrix}\' not found')
+        else:
+            g_matrix = np.array(g_matrix, dtype=int)
+
+        try:
+            with open(file_name_word, 'r') as reader:
+                word = read_matrix(reader)
+        except Exception as e:
+            print(f'warning: {e}')
+
+        print(f'Please make sure that this is your matrix and your word:\n'
+              f'{g_matrix}\n')
+        if word and word[0]:
+            print(f'Y = ({to_line(np.array(word[0], dtype=int), sep)})\n')
+
+        log_Vi, c = rz_task_(g_matrix, word)
         print('\nanswer:')
         print(f'log_2(|V_i|) = {to_line(log_Vi, sep)}\nC = ({to_line(c, sep)})')
     except TaskException as e:
