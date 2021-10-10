@@ -1,52 +1,13 @@
 import numpy as np
 
-from common import to_line, hamming_weight, compare_same_weight, read_matrix
-from exceptions import BadInputException, TaskException, LogicException, AssertException
-from gauss import gauss_minimize, gauss
+from basic.matrixreductions import get_H_matrix_by_G, to_minimal_span_matrix
+from exaptions.exceptions import BadInputException, TaskException, LogicException
+from utils.common import to_line, read_matrix
+from utils.hamming import hamming_weight, compare_same_weight
 
 
 # @author Geny200
-# @version 1.1
 # Sorry for the code, I don't write on python.
-
-def flip_matrix(matrix):
-    # Some hack for reverse traversal
-    for i in range(len(matrix[0])):
-        matrix[:, i] = np.flip(matrix[:, i])
-    for i in range(len(matrix)):
-        matrix[i] = np.flip(matrix[i])
-
-
-def to_minimal_span_matrix(matrix):
-    local_matrix = matrix.copy()
-
-    back_traverse = \
-        np.linalg.matrix_rank(local_matrix[:, :len(local_matrix)]) \
-        != len(local_matrix)
-    for i in range(0, 2):
-        local_matrix = gauss_minimize(local_matrix, back_traverse)
-        flip_matrix(local_matrix)
-
-    # Third step
-    local_matrix = gauss_minimize(local_matrix, False)
-
-    head_columns = set([])
-    tail_columns = set([])
-    for line in local_matrix:
-        try:
-            first_index_of_1 = list(line).index(1)
-            last_index_of_1 = list(line[::-1]).index(1)  # len(line) - line[::-1].index(1) - 1
-            if first_index_of_1 in head_columns or last_index_of_1 in tail_columns:
-                raise AssertException('A logical error in the code, please report it to the maintainer')
-
-            head_columns.add(first_index_of_1)
-            tail_columns.add(last_index_of_1)
-
-        except ValueError:
-            raise LogicException(f'Impossible to reduce the matrix to the spene form')
-
-    return local_matrix
-
 
 def get_active_elements(matrix, column):
     actives = []
@@ -75,28 +36,6 @@ def get_log_Vi(matrix):
     for i in range(0, len(matrix[0])):
         log_Vi.append(sum(x == 1 for x in get_active_elements(matrix, i)))
     return log_Vi
-
-
-# def decode_by_grid(matrix, word, )
-def find_H(matrix):
-    local_matrix = matrix.copy()
-    local_matrix, swap_buff = gauss(local_matrix)
-    swap_buff.reverse()
-
-    a_t = local_matrix[:len(local_matrix), len(local_matrix):].copy()
-
-    # Create H matrix
-    h_matrix = np.zeros([len(local_matrix), len(local_matrix[0])], dtype=int)
-    h_matrix[:, :len(h_matrix)] = a_t.transpose()
-    h_matrix[:, len(h_matrix):] = np.eye(len(h_matrix), len(h_matrix), dtype=int)
-
-    # Swap columns
-    for l, r in swap_buff:
-        copy = h_matrix[:, l].copy()
-        h_matrix[:, l] = h_matrix[:, r]
-        h_matrix[:, r] = copy
-
-    return h_matrix
 
 
 def decode_word_by_H_matrix(matrix, word):
@@ -147,7 +86,7 @@ def rz_task_(g_matrix, word):
     log_Vi = get_log_Vi(span_matrix)
 
     if word and word[0]:
-        h_matrix = find_H(g_matrix)
+        h_matrix = get_H_matrix_by_G(g_matrix)
         c = decode_word_by_H_matrix(h_matrix, np.array(word[0], dtype=int))
         return log_Vi, c
     else:
@@ -188,5 +127,5 @@ def main():
     except TaskException as e:
         print(f'error: {e.message}')
 
-
-main()
+if __name__ == '__main__':
+    main()

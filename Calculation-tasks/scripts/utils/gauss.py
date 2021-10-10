@@ -78,7 +78,7 @@ def gauss(A):
 
 
 # Gaussian function for minimize.
-def gauss_minimize(A, reverse_traversal = True):
+def gauss_minimize(A, reverse_traversal=True):
     columns_i_matrix = []
     column_i = 0
     for i in range(len(A)):
@@ -95,7 +95,7 @@ def gauss_minimize(A, reverse_traversal = True):
             A[cur] = copy
             # print(A)
 
-        if column_i < len(A) - 1:
+        if column_i < len(A[0]) - 1:
             for k in range(i + 1, len(A)):
                 if A[k][column_i] > 0:
                     # print(f'{k} - {i}')
@@ -103,6 +103,7 @@ def gauss_minimize(A, reverse_traversal = True):
                     A[k] %= 2
         columns_i_matrix.append(column_i)
         column_i += 1
+
     if reverse_traversal:
         columns_i_matrix.reverse()
         # print('end')

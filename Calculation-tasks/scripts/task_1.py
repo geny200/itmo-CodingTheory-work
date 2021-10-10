@@ -1,26 +1,13 @@
 import numpy as np
 
-from common import to_line, hamming_weight, hamming_dist, compare_same_weight, read_matrix
-from gauss import gauss, gauss_minimize
+from utils.common import to_line, read_matrix
+from utils.gauss import gauss, gauss_minimize
+from utils.hamming import hamming_weight, hamming_dist, compare_same_weight
 
 
 # @author Geny200
 # @version 3.8
 # Sorry for the code, I don't write on python.
-
-
-# Makes index matching. (you can optimize up to one line)
-def evaluate_num(n, swap_buff):
-    line = np.array(range(n - 1, -1, -1), dtype=int)
-    nums = np.zeros(n, dtype=int)
-    for i, x in enumerate(line):
-        nums[x] = i
-    upd_buffer = []
-    for l, r in swap_buff:
-        upd_buffer.append((nums[l], nums[r]))
-
-    swap_buff = upd_buffer
-    return swap_buff
 
 
 # Makes the calculation of the generating matrix (G)
