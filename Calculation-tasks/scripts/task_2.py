@@ -1,7 +1,7 @@
 import numpy as np
 
-from basic.matrixreductions import get_H_matrix_by_G, to_minimal_span_matrix
-from exaptions.exceptions import BadInputException, TaskException, LogicException
+from tools.matrixreductions import get_H_matrix_by_G, to_minimal_span_matrix
+from exceptions.exceptions import BadInputException, TaskException, LogicException
 from utils.common import to_line, read_matrix
 from utils.hamming import hamming_weight, compare_same_weight
 

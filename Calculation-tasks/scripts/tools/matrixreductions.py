@@ -1,6 +1,6 @@
 import numpy as np
 
-from exaptions.exceptions import AssertException, LogicException
+from exceptions.exceptions import AssertException, LogicException
 from utils.gauss import gauss, gauss_minimize
 
 
@@ -92,29 +92,36 @@ def flip_matrix(matrix):
 def to_minimal_span_matrix(matrix):
     local_matrix = matrix.copy()
 
-    back_traverse = \
-        np.linalg.matrix_rank(local_matrix[:, :len(local_matrix)]) \
-        != len(local_matrix)
     for i in range(0, 2):
-        local_matrix = gauss_minimize(local_matrix, back_traverse)
+        local_matrix = gauss_minimize(local_matrix, False)
         flip_matrix(local_matrix)
 
     # Third step
     local_matrix = gauss_minimize(local_matrix, False)
 
-    head_columns = set([])
-    tail_columns = set([])
-    for line in local_matrix:
-        try:
-            first_index_of_1 = list(line).index(1)
-            last_index_of_1 = list(line[::-1]).index(1)  # len(line) - line[::-1].index(1) - 1
-            if first_index_of_1 in head_columns or last_index_of_1 in tail_columns:
-                raise AssertException('A logical error in the code, please report it to the maintainer')
+    correct = False
+    while (not correct):
+        correct = True
+        head_columns = {}
+        tail_columns = {}
+        for i, line in enumerate(local_matrix):
+            try:
+                first_index_of_1 = list(line).index(1)
+                last_index_of_1 = len(line) - list(line[::-1]).index(1) - 1
 
-            head_columns.add(first_index_of_1)
-            tail_columns.add(last_index_of_1)
+                if last_index_of_1 in tail_columns:
+                    local_matrix[tail_columns[last_index_of_1]] -= line
+                    local_matrix[tail_columns[last_index_of_1]] %= 2
+                    correct = False
+                    break
 
-        except ValueError:
-            raise LogicException(f'Impossible to reduce the matrix to the spene form')
+                if first_index_of_1 in head_columns:
+                    raise AssertException('A logical error in the code, please report it to the maintainer')
+
+                head_columns[first_index_of_1] = i
+                tail_columns[last_index_of_1] = i
+
+            except ValueError:
+                raise LogicException(f'Impossible to reduce the matrix to the spene form')
 
     return local_matrix

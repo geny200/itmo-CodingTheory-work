@@ -1,4 +1,4 @@
-from exaptions.exceptions import BadInputException
+from exceptions.exceptions import BadInputException
 
 
 def to_line(line, place_word=''):
