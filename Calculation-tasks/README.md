@@ -5,7 +5,7 @@
     * [task_1.py](./scripts/task_1.py) - Запуск.
 * [**РЗ 2: Декодирование по минимальной решетке**]()
     * [task_2_matrix.txt](./data/task_2_matrix.txt) - Порождающая матрица;
-    * [task_2_word.txt](./data/task_2_word.txt) (необязательно) - Входящее кодовое слово с ошибкой;
+    * [task_2_word.txt](./data/task_2_word.txt) - Входящее кодовое слово с ошибкой;
     * [task_2.py](./scripts/task_2.py) - Запуск ```main()```.
 
 ***Working directory*** для запуска скриптов - **Calculation-tasks**

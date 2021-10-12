@@ -1,7 +1,7 @@
 import numpy as np
 
-from tools.matrixreductions import get_H_matrix_by_G, to_minimal_span_matrix
 from exceptions.exceptions import BadInputException, TaskException, LogicException
+from tools.matrixreductions import get_H_matrix_by_G, to_minimal_span_matrix
 from utils.common import to_line, read_matrix
 from utils.hamming import hamming_weight, compare_same_weight
 
@@ -94,6 +94,14 @@ def rz_task_(g_matrix, word):
         return log_Vi, []
 
 
+def safe_get_from_file(file_name, entity_name):
+    with open(file_name, 'r') as reader:
+        matrix = read_matrix(reader)
+    if not matrix:
+        raise BadInputException(f'{entity_name} in file \'{file_name}\' not found')
+    return matrix
+
+
 def main():
     # Evaluate task from file
     file_name_matrix = 'data/task_2_matrix.txt'
@@ -101,20 +109,10 @@ def main():
     sep = ' '
 
     try:
-        word = None
-        with open(file_name_matrix, 'r') as reader:
-            g_matrix = read_matrix(reader)
+        g_matrix = safe_get_from_file(file_name_matrix, 'Matrix')
+        g_matrix = np.array(g_matrix, dtype=int)
 
-        if not g_matrix:
-            raise BadInputException(f'Matrix in file \'{file_name_matrix}\' not found')
-        else:
-            g_matrix = np.array(g_matrix, dtype=int)
-
-        try:
-            with open(file_name_word, 'r') as reader:
-                word = read_matrix(reader)
-        except Exception as e:
-            print(f'warning: {e}')
+        word = safe_get_from_file(file_name_word, 'Word Y')
 
         print(f'Please make sure that this is your matrix and your word:\n'
               f'{g_matrix}\n')
@@ -126,6 +124,7 @@ def main():
         print(f'log_2(|V_i|) = {to_line(log_Vi, sep)}\nC = ({to_line(c, sep)})')
     except TaskException as e:
         print(f'error: {e.message}')
+
 
 if __name__ == '__main__':
     main()
