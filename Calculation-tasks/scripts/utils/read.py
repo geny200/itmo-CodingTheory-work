@@ -26,3 +26,21 @@ def safe_get_from_file(file_name, entity_name='Object'):
         return matrix
     except FileNotFoundError:
         raise BadInputException(f'File with {entity_name} in path \'{file_name}\' not found')
+
+
+def safe_get_numbers_from_file(file_name, entity_name='Numbers'):
+    try:
+        with open(file_name, 'r') as reader:
+            numbers = []
+            for line in reader:
+                line = line.strip()
+                try:
+                    num = int(line)
+                    numbers.append(num)
+                except Exception:
+                    pass
+        if not numbers:
+            raise BadInputException(f'{entity_name} in file \'{file_name}\' not found')
+        return numbers
+    except FileNotFoundError:
+        raise BadInputException(f'File with {entity_name} in path \'{file_name}\' not found')
