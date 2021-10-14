@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 from exceptions.exceptions import BadInputException, TaskException, LogicException
@@ -44,7 +46,7 @@ def decode_word_by_H_matrix(matrix, word):
     s = word.dot(matrix.transpose())
     s %= 2
 
-    syndrome = find_syndromes(matrix.transpose())
+    syndrome = find_syndromes(matrix)
 
     code_word = list(map(lambda x, y: (x + y) % 2, list(word), list(syndrome[int(to_line(list(s)), 2)])))
 
@@ -105,3 +107,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
