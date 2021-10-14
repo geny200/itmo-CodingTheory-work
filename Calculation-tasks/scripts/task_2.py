@@ -2,8 +2,9 @@ import numpy as np
 
 from exceptions.exceptions import BadInputException, TaskException, LogicException
 from tools.matrixreductions import get_H_matrix_by_G, to_minimal_span_matrix
-from utils.common import to_line, read_matrix
-from utils.hamming import hamming_weight, compare_same_weight
+from tools.parameters import find_syndromes
+from utils.common import to_line
+from utils.read import safe_get_from_file
 
 
 # @author Geny200
@@ -43,23 +44,7 @@ def decode_word_by_H_matrix(matrix, word):
     s = word.dot(matrix.transpose())
     s %= 2
 
-    syndrome = {}
-    # Calculate syndrome for each error vector
-    h_source = matrix.transpose()
-    for i in range(2 ** n):
-        new_word = np.array(list(format(i, f'0{n}b')), dtype=int)
-        e_word = new_word.dot(h_source)
-        e_word %= 2
-
-        syndrome_word = int(to_line(list(e_word)), 2)
-        if syndrome_word not in syndrome:
-            syndrome[syndrome_word] = new_word
-        else:
-            old_word = syndrome[syndrome_word]
-            if hamming_weight(old_word) > hamming_weight(new_word):
-                syndrome[syndrome_word] = new_word
-            elif hamming_weight(old_word) == hamming_weight(new_word):
-                syndrome[syndrome_word] = compare_same_weight(old_word, new_word)
+    syndrome = find_syndromes(matrix.transpose())
 
     code_word = list(map(lambda x, y: (x + y) % 2, list(word), list(syndrome[int(to_line(list(s)), 2)])))
 
@@ -92,14 +77,6 @@ def rz_task_(g_matrix, word):
     else:
         print(f'warning: word \'Y\' not found')
         return log_Vi, []
-
-
-def safe_get_from_file(file_name, entity_name):
-    with open(file_name, 'r') as reader:
-        matrix = read_matrix(reader)
-    if not matrix:
-        raise BadInputException(f'{entity_name} in file \'{file_name}\' not found')
-    return matrix
 
 
 def main():

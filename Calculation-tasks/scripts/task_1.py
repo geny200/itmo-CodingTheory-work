@@ -1,8 +1,10 @@
 import numpy as np
 
-from utils.common import to_line, read_matrix
+from tools.matrixreductions import evaluate_num
+from tools.parameters import find_d_min_by_g_matrix, find_syndromes
+from utils.common import to_line
 from utils.gauss import gauss, gauss_minimize
-from utils.hamming import hamming_weight, hamming_dist, compare_same_weight
+from utils.read import read_matrix
 
 
 # @author Geny200
@@ -84,49 +86,15 @@ def rz_task(file_name):
     g_dot_ht %= 2
     print(f'Check G * H = \n{g_dot_ht}')
 
-    # Calculate all code words (in c_all)
-    c_all = []
-    syndrome = {}
-    for i in range(2 ** len(g_matrix)):
-        word = np.array(list(format(i, f'0{len(g_matrix)}b')), dtype=int)
-        word = word.dot(g_matrix)
-        word %= 2
-        c_all.append(word)
-
-    # Calculate min dist (aka compare all pairs)
-    d_min = rank
-    for i in range(len(c_all)):
-        for j in range(i, len(c_all), 1):
-            if i != j:
-                dist = hamming_dist(c_all[i], c_all[j])
-                if dist < d_min:
-                    d_min = dist
+    # Calculate all code words and evaluate d_min
+    d_min = find_d_min_by_g_matrix(g_matrix)
     print(f'd_min = {d_min}')
 
-    all_code_word = []
-    # Calculate syndrome for each error vector
-    h_source = h_source.transpose()
-    for i in range(2 ** n):
-        new_word = np.array(list(format(i, f'0{n}b')), dtype=int)
-        e_word = new_word.dot(h_source)
-        e_word %= 2
-
-        syndrome_word = int(to_line(list(e_word)), 2)
-        if syndrome_word == 0:
-            all_code_word.append(new_word)
-
-        if syndrome_word not in syndrome:
-            syndrome[syndrome_word] = new_word
-        else:
-            old_word = syndrome[syndrome_word]
-            if hamming_weight(old_word) > hamming_weight(new_word):
-                syndrome[syndrome_word] = new_word
-            elif hamming_weight(old_word) == hamming_weight(new_word):
-                syndrome[syndrome_word] = compare_same_weight(old_word, new_word)
+    syndrome = find_syndromes(h_matrix)
 
     # Print standard table
-    for i in range(2 ** len(h_source[0])):
-        binary_index = format(i, f'0{len(h_source[0])}b')[::-1]
+    for i in range(2 ** len(h_source)):
+        binary_index = format(i, f'0{len(h_source)}b')[::-1]
         index = int(binary_index, 2)
         if index not in syndrome:
             print('')

@@ -39,8 +39,10 @@ def get_H_matrix_by_G(g_matrix):
     return h_matrix
 
 
-def get_G_matrix_by_H(h__matrix):
-    local_matrix = h__matrix.copy()
+def get_G_matrix_by_H(h_matrix):
+    local_matrix = h_matrix.copy()
+    local_source = h_matrix.copy()
+
     n = len(local_matrix[0])
 
     # Some hack for minimality conditions
@@ -62,12 +64,13 @@ def get_G_matrix_by_H(h__matrix):
     swap_buff = evaluate_num(n, swap_buff)
     swap_buff.reverse()
 
-    a_t = local_matrix[:len(local_matrix), :len(local_matrix)].copy()
+    a_t = local_matrix[:len(local_matrix), :(len(local_matrix[0]) - len(local_matrix))].copy()
 
     # Create G matrix
-    g_matrix = np.zeros([len(local_matrix), len(local_matrix[0])], dtype=int)
-    g_matrix[:, len(g_matrix):] = a_t.transpose()
-    g_matrix[:, :len(g_matrix)] = np.eye(len(g_matrix), len(g_matrix), dtype=int)
+    g_matrix = np.zeros([len(a_t[0]), (len(a_t[0]) + len(a_t))], dtype=int)
+    a_t = a_t.transpose()
+    g_matrix[:, (len(g_matrix[0]) - len(a_t[0])):] = a_t
+    g_matrix[:, :(len(g_matrix[0]) - len(a_t[0]))] = np.eye(len(g_matrix), len(g_matrix), dtype=int)
 
     # Swap columns
     for l, r in swap_buff:
@@ -77,7 +80,12 @@ def get_G_matrix_by_H(h__matrix):
 
     # Make minimal G
     g_matrix = gauss_minimize(g_matrix)
-
+    g_dot_ht = g_matrix.dot(local_source.transpose())
+    g_dot_ht %= 2
+    for line in g_dot_ht:
+        for value in line:
+            if value != 0:
+                raise AssertException('A logical error in the code (GxH^T not 0), please report it to the maintainer')
     return g_matrix
 
 
