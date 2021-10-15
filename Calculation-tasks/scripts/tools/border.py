@@ -1,6 +1,6 @@
 import math
 
-from exceptions.exceptions import LogicException
+from exceptions.exceptions import LogicException, TaskException
 
 
 def gr_find_k_by_n_d(n, d, logger=None):
@@ -95,3 +95,35 @@ def vg_find_k_by_n_d(n, d, logger=None):
                    f'q^({n} - {i - 1}) = {2 ** (n - i + 1)}\n')
         return i - 1
     return 0
+
+
+def hamming_find_k_by_n_d(n, d, q=2, logger=None):
+    t = math.floor((d - 1) / 2)
+    sum = 0
+
+    for i in range(t + 1):
+        sum += math.factorial(n) \
+               / (math.factorial(i) * math.factorial(n - i)) \
+               * ((q - 1) ** i)
+    sum = (q ** n) / sum
+    k = math.log2(sum)
+    if logger:
+        logger(f'q^k <= q^n / (sum by i in C_n^i * (q - 1)^i, from 0 to t = floor((d - 1) / 2))\n'
+               f'd = {d}\n'
+               f't = floor ((d - 1) / 2) => {t}\n'
+               f'q^k = sum = {sum}\n'
+               f'k = log_q(sum) = {math.log2(sum)}\n')
+    if k > n - d + 1:
+        raise LogicException("Invalid n or d parameter")
+    return math.floor(math.log2(sum))
+
+
+def hamming_find_d_by_n_k(n, k, q=2, logger=None):
+    d_min = 0
+    for d in range(3, n):
+        try:
+            if k <= hamming_find_k_by_n_d(n, d, q, logger):
+                d_min = d
+        except TaskException:
+            break
+    return d_min
