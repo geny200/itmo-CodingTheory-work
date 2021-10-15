@@ -52,7 +52,7 @@ def gr_find_d_by_n_k(n, k, logger=None):
 
 
 def vg_find_k_by_n_d(n, d, q=2):
-    return math.floor(math.log2(q ** n / (sum(C_i_n(n, i) * ((q - 1) ** i) for i in range(d)))))
+    return math.ceil(math.log2(q ** n / (sum(C_i_n(n, i) * ((q - 1) ** i) for i in range(d)))))
 
 
 def vg_find_d_by_n_k(n, k, q=2):
