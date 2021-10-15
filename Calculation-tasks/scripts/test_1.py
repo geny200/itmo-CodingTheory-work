@@ -2,7 +2,7 @@ import numpy as np
 
 from exceptions.exceptions import TaskException, BadInputException
 from tools.border import gr_find_d_by_n_k, vg_find_d_by_n_k, gr_find_k_by_n_d, vg_find_k_by_n_d, hamming_find_d_by_n_k, \
-    hamming_find_k_by_n_d
+    hamming_find_k_by_n_d, vg_find_k_by_n_d_linear, vg_find_d_by_n_k_linear
 from tools.matrixreductions import get_G_matrix_by_H
 from tools.parameters import find_d_min_by_g_matrix, get_standard_table
 from utils.common import to_line
@@ -73,11 +73,13 @@ def main():
             k = border_n_k[1]
             gr_d_min = gr_find_d_by_n_k(n, k)
             vg_d_min = vg_find_d_by_n_k(n, k)
+            vg_d_min_linear = vg_find_d_by_n_k_linear(n, k)
             hamming_d_min = hamming_find_d_by_n_k(n, k)
 
             print(f'Greismer border for          (n = {n}, k = {k}) => d_min = {gr_d_min}\n'
+                  f'Hamming border for           (n = {n}, k = {k}) => d_min = {hamming_d_min}\n'
                   f'Varshamov-Gilbert border for (n = {n}, k = {k}) => d_min = {vg_d_min}\n'
-                  f'Hamming border for           (n = {n}, k = {k}) => d_min = {hamming_d_min}\n')
+                  f'Varshamov-Gilbert (linear) border for (n = {n}, k = {k}) => d_min = {vg_d_min_linear}\n')
         except BadInputException as e:
             print(f'warning: {e.message}')
 
@@ -90,11 +92,13 @@ def main():
             d = border_n_d[1]
             gr_k_max = gr_find_k_by_n_d(n, d)
             vg_k_max = vg_find_k_by_n_d(n, d)
+            vg_k_max_linear = vg_find_k_by_n_d_linear(n, d)
             hamming_k = hamming_find_k_by_n_d(n, d)
 
             print(f'Greismer border for          (n = {n}, d_min = {d}) => k = {gr_k_max}\n'
+                  f'Hamming border for           (n = {n}, d_min = {d}) => k = {hamming_k}\n'
                   f'Varshamov-Gilbert border for (n = {n}, d_min = {d}) => k = {vg_k_max}\n'
-                  f'Hamming border for           (n = {n}, d_min = {d}) => k = {hamming_k}\n')
+                  f'Varshamov-Gilbert (linear) border for (n = {n}, d_min = {d}) => k = {vg_k_max_linear}\n')
         except BadInputException as e:
             print(f'warning: {e.message}')
 

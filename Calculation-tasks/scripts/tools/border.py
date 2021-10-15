@@ -3,6 +3,10 @@ import math
 from exceptions.exceptions import LogicException, TaskException
 
 
+def C_i_n(n, k):
+    return math.factorial(n) / (math.factorial(k) * math.factorial(n - k))
+
+
 def gr_find_k_by_n_d(n, d, logger=None):
     if not (n >= d > 0):
         raise LogicException(f'N = {n} should be grater than or equal to d = {d},'
@@ -47,7 +51,22 @@ def gr_find_d_by_n_k(n, k, logger=None):
     return 1
 
 
-def vg_find_d_by_n_k(n, k, logger=None):
+def vg_find_k_by_n_d(n, d, q=2):
+    return math.floor(math.log2(q ** n / (sum(C_i_n(n, i) * ((q - 1) ** i) for i in range(d)))))
+
+
+def vg_find_d_by_n_k(n, k, q=2):
+    d_min = 0
+    for d in range(1, n):
+        try:
+            if k <= vg_find_k_by_n_d(n, d, q):
+                d_min = d
+        except TaskException:
+            break
+    return d_min
+
+
+def vg_find_d_by_n_k_linear(n, k, logger=None):
     if not (n >= k > 0):
         raise LogicException(f'N = {n} should be grater than or equal to K = {k},'
                              f' which should be grater than 0')
@@ -66,12 +85,11 @@ def vg_find_d_by_n_k(n, k, logger=None):
                        f'from 0 until (d - 2) = {d - 1} => sum = {sum}\n')
             return d + 1
         sum_old = sum
-        sum += (math.factorial(n - 1) /
-                (math.factorial(d) * (math.factorial(n - 1 - d))))
+        sum += C_i_n(n - 1, d)
     return 0
 
 
-def vg_find_k_by_n_d(n, d, logger=None):
+def vg_find_k_by_n_d_linear(n, d, logger=None):
     if not (n >= d > 0):
         raise LogicException(f'N = {n} should be grater than or equal to d = {d},'
                              f' which should be grater than 0')
@@ -80,8 +98,7 @@ def vg_find_k_by_n_d(n, d, logger=None):
 
     sum = 0
     for i in range(d - 2):
-        sum += (math.factorial(n - 1) /
-                (math.factorial(i) * (math.factorial(n - 1 - i))))
+        sum += C_i_n(n - 1, i)
 
     for i in range(n):
         if (2 ** (n - i)) > sum:
@@ -102,9 +119,8 @@ def hamming_find_k_by_n_d(n, d, q=2, logger=None):
     sum = 0
 
     for i in range(t + 1):
-        sum += math.factorial(n) \
-               / (math.factorial(i) * math.factorial(n - i)) \
-               * ((q - 1) ** i)
+        sum += C_i_n(n, i) * ((q - 1) ** i)
+
     sum = (q ** n) / sum
     k = math.log2(sum)
     if logger:
