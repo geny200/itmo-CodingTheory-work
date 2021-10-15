@@ -1,10 +1,8 @@
-import math
-
 import numpy as np
 
 from exceptions.exceptions import BadInputException, TaskException, LogicException
+from tools.decoder import decode_by_h_matrix
 from tools.matrixreductions import get_H_matrix_by_G, to_minimal_span_matrix
-from tools.parameters import find_syndromes
 from utils.common import to_line
 from utils.read import safe_get_from_file
 
@@ -41,24 +39,6 @@ def get_log_Vi(matrix):
     return log_Vi
 
 
-def decode_word_by_H_matrix(matrix, word):
-    n = len(matrix[0])
-    s = word.dot(matrix.transpose())
-    s %= 2
-
-    syndrome = find_syndromes(matrix)
-
-    code_word = list(map(lambda x, y: (x + y) % 2, list(word), list(syndrome[int(to_line(list(s)), 2)])))
-
-    # print('logs:')
-    # print(f'syndrom = {s}')
-    # print(f'word = {word}')
-    # print(f'T[s] = {syndrome[int(to_line(list(s)), 2)]}')
-    # print(f'C    = {np.array(code_word, dtype=int)}')
-    # print(f't    = {sum(x == 1 for x in syndrome[int(to_line(list(s)), 2)])}')
-    return code_word
-
-
 def rz_task_(g_matrix, word):
     if len(g_matrix) > len(g_matrix[0]):
         print('warning: Pls, check correctness of matrix (smth wrong);')
@@ -74,7 +54,7 @@ def rz_task_(g_matrix, word):
 
     if word and word[0]:
         h_matrix = get_H_matrix_by_G(g_matrix)
-        c = decode_word_by_H_matrix(h_matrix, np.array(word[0], dtype=int))
+        c = decode_by_h_matrix(h_matrix, np.array(word[0], dtype=int))
         return log_Vi, c
     else:
         print(f'warning: word \'Y\' not found')
@@ -107,5 +87,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
