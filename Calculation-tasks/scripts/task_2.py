@@ -39,15 +39,15 @@ def get_log_Vi(matrix):
     return log_Vi
 
 
-def rz_task_(g_matrix, word):
+def rz_task_(g_matrix, word, logger):
     if len(g_matrix) > len(g_matrix[0]):
-        print('warning: Pls, check correctness of matrix (smth wrong);')
+        logger('warning: Pls, check correctness of matrix (smth wrong);')
 
     rank = np.linalg.matrix_rank(g_matrix)
 
     if rank != len(g_matrix):
         raise BadInputException(f'If rank = ({rank}) < dim(matrix) = {len(g_matrix)} smth can be wrong')
-        # print('warning: If rank < dim(matrix) smth can be wrong;')
+        # logger('warning: If rank < dim(matrix) smth can be wrong;')
 
     span_matrix = to_minimal_span_matrix(g_matrix)
     log_Vi = get_log_Vi(span_matrix)
@@ -57,11 +57,11 @@ def rz_task_(g_matrix, word):
         c = decode_by_h_matrix(h_matrix, np.array(word[0], dtype=int))
         return log_Vi, c
     else:
-        print(f'warning: word \'Y\' not found')
+        logger(f'warning: word \'Y\' not found')
         return log_Vi, []
 
 
-def main():
+def main(logger):
     # Evaluate task from file
     file_name_matrix = 'data/task_2_matrix.txt'
     file_name_word = 'data/task_2_word.txt'
@@ -73,17 +73,17 @@ def main():
 
         word = safe_get_from_file(file_name_word, 'Word Y')
 
-        print(f'Please make sure that this is your matrix and your word:\n'
+        logger(f'Please make sure that this is your matrix and your word:\n'
               f'{g_matrix}\n')
         if word and word[0]:
-            print(f'Y = ({to_line(np.array(word[0], dtype=int), sep)})\n')
+            logger(f'Y = ({to_line(np.array(word[0], dtype=int), sep)})\n')
 
-        log_Vi, c = rz_task_(g_matrix, word)
-        print('\nanswer:')
-        print(f'log_2(|V_i|) = {to_line(log_Vi, sep)}\nC = ({to_line(c, sep)})')
+        log_Vi, c = rz_task_(g_matrix, word, logger)
+        logger('\nanswer:')
+        logger(f'log_2(|V_i|) = {to_line(log_Vi, sep)}\nC = ({to_line(c, sep)})')
     except TaskException as e:
-        print(f'error: {e.message}')
+        logger(f'error: {e.message}')
 
 
 if __name__ == '__main__':
-    main()
+    main(print)

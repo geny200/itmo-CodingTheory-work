@@ -37,48 +37,48 @@ def find_row(matrix, current_line, current_column):
 
 
 # Gaussian function for constructing a I matrix in place.
-def gauss(A):
+def gauss(A, logger = (lambda x: x)):
     swap_buff = []
     for i in range(len(A)):
-        # print(f'-------{i}--------')
-        # print(A)
+        # logger(f'-------{i}--------')
+        # logger(A)
         cur = find_column(A, i, i)
         if cur != i:
-            # print(f'swap column - {i} {cur}')
+            # logger(f'swap column - {i} {cur}')
             swap_buff.append((i, cur))
             copy = A[:, i].copy()
             A[:, i] = A[:, cur]
             A[:, cur] = copy
-            # print(A)
+            # logger(A)
         cur = find_row(A, i, i)
         if cur != i:
-            # print(f'swap line - {i} {cur}')
+            # logger(f'swap line - {i} {cur}')
             copy = A[i].copy()
             A[i] = A[cur]
             A[cur] = copy
-            # print(A)
+            # logger(A)
 
         if i < len(A) - 1:
             for k in range(i + 1, len(A)):
                 if A[k][i] > 0:
-                    # print(f'{k} - {i}')
+                    # logger(f'{k} - {i}')
                     A[k] -= A[i]
                     A[k] %= 2
-                    # print(f'{A}')
+                    # logger(f'{A}')
 
     for i in range(len(A), 0, -1):
         for k in range(i - 1, 0, -1):
             if A[k - 1][i - 1] > 0:
-                # print(f'{k - 1} - {i - 1}')
+                # logger(f'{k - 1} - {i - 1}')
                 A[k - 1] -= A[i - 1]
                 A[k - 1] %= 2
-                # print(f'{A}')
+                # logger(f'{A}')
 
     return A, swap_buff
 
 
 # Gaussian function for minimize.
-def gauss_minimize(A, reverse_traversal=True):
+def gauss_minimize(A, reverse_traversal=True, logger = (lambda x: x)):
     columns_i_matrix = []
     column_i = 0
     for i in range(len(A)):
@@ -89,16 +89,16 @@ def gauss_minimize(A, reverse_traversal=True):
 
         cur = find_row(A, i, column_i)
         if cur != i:
-            # print(f'swap line - {i} {cur}')
+            # logger(f'swap line - {i} {cur}')
             copy = A[i].copy()
             A[i] = A[cur]
             A[cur] = copy
-            # print(A)
+            # logger(A)
 
         if column_i < len(A[0]) - 1:
             for k in range(i + 1, len(A)):
                 if A[k][column_i] > 0:
-                    # print(f'{k} - {i}')
+                    # logger(f'{k} - {i}')
                     A[k] -= A[i]
                     A[k] %= 2
         columns_i_matrix.append(column_i)
@@ -106,15 +106,15 @@ def gauss_minimize(A, reverse_traversal=True):
 
     if reverse_traversal:
         columns_i_matrix.reverse()
-        # print('end')
-        # print(f'{columns_i_matrix}')
+        # logger('end')
+        # logger(f'{columns_i_matrix}')
         for order, column in zip(range(len(columns_i_matrix) - 1, -1, -1), columns_i_matrix):
             for row in range(order, 0, -1):
                 if A[row - 1][column] > 0:
-                    # print(f'{order}, {column}, {row}')
-                    # print(f'{row - 1} - {order}')
+                    # logger(f'{order}, {column}, {row}')
+                    # logger(f'{row - 1} - {order}')
                     A[row - 1] -= A[order]
                     A[row - 1] %= 2
-                    # print(f'{A}')
+                    # logger(f'{A}')
 
     return A

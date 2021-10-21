@@ -16,13 +16,13 @@ from utils.read import read_matrix
 # and related parameters (n and k).
 # This function takes into account the conditions of
 # minimality of the column numbers of the E matrix in G.
-def rz_task(file_name):
+def rz_task(file_name, logger):
     h_matrix = []
     with open(file_name, 'r') as reader:
         h_matrix = read_matrix(reader)
 
     if not h_matrix or len(h_matrix) > len(h_matrix[0]):
-        print('err: Smth wrong with matrix;')
+        logger('err: Smth wrong with matrix;')
         return
 
     h_matrix = np.array(h_matrix, dtype=int)
@@ -31,10 +31,10 @@ def rz_task(file_name):
     rank = np.linalg.matrix_rank(h_matrix)
     n = len(h_matrix[0])
     k = n - rank
-    print(f'n = {n}\nk = {n - rank}')
+    logger(f'n = {n}\nk = {n - rank}')
 
     if rank != len(h_matrix) or len(h_matrix[0]) != rank * 2:
-        print('warning: There might be mistake;')
+        logger('warning: There might be mistake;')
 
     # Some hack for minimality conditions
     for i in range(len(h_matrix[0])):
@@ -72,36 +72,37 @@ def rz_task(file_name):
     g_matrix = gauss_minimize(g_matrix)
 
     # Show answers
-    print(f'H = \n{h_source}')
-    print(f'G = \n{g_matrix}')
+    logger(f'H = \n{h_source}')
+    logger(f'G = \n{g_matrix}')
 
     copyable_show = to_line(
         list(
             to_line(y) for y in list(g_matrix)
         ), '\n'
     )
-    print(f'G = \n{copyable_show}')
+    logger(f'G = \n{copyable_show}')
 
     g_dot_ht = g_matrix.dot(h_source.transpose())
     g_dot_ht %= 2
-    print(f'Check G * H = \n{g_dot_ht}')
+    logger(f'Check G * H = \n{g_dot_ht}')
 
     # Calculate all code words and evaluate d_min
     d_min = find_d_min_by_g_matrix(g_matrix)
-    print(f'd_min = {d_min}')
+    logger(f'd_min = {d_min}')
 
     syndrome = find_syndromes(h_matrix)
 
-    # Print standard table
+    # logger standard table
     for i in range(2 ** len(h_source)):
         binary_index = format(i, f'0{len(h_source)}b')[::-1]
         index = int(binary_index, 2)
         if index not in syndrome:
-            print('')
+            logger('')
             continue
-        print(f'T[{binary_index}] = {to_line(list(syndrome[index]))}')
+        logger(f'T[{binary_index}] = {to_line(list(syndrome[index]))}')
 
 
 # Evaluate task from file
 # !! Input file must not contain extra lines
-rz_task('data/task_1.txt')
+if __name__ == '__main__':
+    rz_task('data/task_1.txt', print)

@@ -12,17 +12,17 @@ from utils.read import safe_get_from_file, safe_get_numbers_from_file
 # @author Geny200
 # Sorry for the code, I don't write on python.
 
-def test_1(h_matrix):
+def test_1(h_matrix, logger):
     h_matrix_local = h_matrix.copy()
 
     if len(h_matrix) > len(h_matrix[0]):
-        print('warning: Pls, check correctness of matrix (smth wrong);')
+        logger('warning: Pls, check correctness of matrix (smth wrong);')
 
     rank = np.linalg.matrix_rank(h_matrix)
 
     if rank != len(h_matrix):
-        print(f'warning: If rank < dim(matrix) smth can be wrong '
-              f'(rank = {rank}; dim = {len(h_matrix)});')
+        logger(f'warning: If rank < dim(matrix) smth can be wrong '
+               f'(rank = {rank}; dim = {len(h_matrix)});')
 
     g_matrix = get_G_matrix_by_H(h_matrix_local)
 
@@ -35,35 +35,38 @@ def test_1(h_matrix):
 
 
 # Evaluate task from file
-def main():
+def main(logger):
     file_name_matrix = 'data/test_1_matrix.txt'
     file_name_n_k = 'data/test_1_border_n_k.txt'
     file_name_n_d = 'data/test_1_border_n_d.txt'
-    sep = ' '
 
     try:
-        h_matrix = safe_get_from_file(file_name_matrix, 'Matrix')
-        h_matrix = np.array(h_matrix, dtype=int)
+        try:
+            h_matrix = safe_get_from_file(file_name_matrix, 'Matrix')
+            h_matrix = np.array(h_matrix, dtype=int)
 
-        print(f'Please make sure that this is your H matrix:\n'
-              f'H matrix = \n'
-              f'{h_matrix}\n')
+            logger(f'Please make sure that this is your H matrix:\n'
+                   f'H matrix = \n'
+                   f'{h_matrix}\n')
+            g_matrix, d_min, d_min_dual, standard_table = test_1(h_matrix, logger)
 
-        g_matrix, d_min, d_min_dual, standard_table = test_1(h_matrix)
+            logger(f'G matrix = \n'
+                   f'{g_matrix}\n'
+                   f'\n'
+                   f'd_min = {d_min}\n'
+                   f'd_min (dual) = {d_min_dual}\n'
+                   f'\n'
+                   f'standard table (syndromes): ')
 
-        print(f'G matrix = \n'
-              f'{g_matrix}\n'
-              f'\n'
-              f'd_min = {d_min}\n'
-              f'd_min (dual) = {d_min_dual}\n'
-              f'\n'
-              f'standard table (syndromes): ')
+            for syndrome in standard_table:
+                binary_index = format(syndrome, f'0{len(h_matrix)}b')[::-1]
+                logger(f'T[{binary_index}] = {to_line(standard_table[syndrome])}')
+        except TaskException as e:
+            logger(f'error: {e.message}')
+        except Exception as e:
+            logger(f'Unexpected error in matrix evaluations: {e}')
 
-        for syndrome in standard_table:
-            binary_index = format(syndrome, f'0{len(h_matrix)}b')[::-1]
-            print(f'T[{binary_index}] = {to_line(standard_table[syndrome])}')
-
-        print('\nBorders:')
+        logger('\nBorders:')
         try:
             border_n_k = safe_get_numbers_from_file(file_name_n_k, 'N and K for border task')
             if not border_n_k or len(border_n_k) != 2:
@@ -76,12 +79,14 @@ def main():
             vg_d_min_linear = vg_find_d_by_n_k_linear(n, k)
             hamming_d_min = hamming_find_d_by_n_k(n, k)
 
-            print(f'Greismer border for          (n = {n}, k = {k}) => d_min = {gr_d_min}\n'
-                  f'Hamming border for           (n = {n}, k = {k}) => d_min = {hamming_d_min}\n'
-                  f'Varshamov-Gilbert border for (n = {n}, k = {k}) => d_min = {vg_d_min}\n'
-                  f'Varshamov-Gilbert (linear) border for (n = {n}, k = {k}) => d_min = {vg_d_min_linear}\n')
+            logger(f'Greismer border for          (n = {n}, k = {k}) => d_min = {gr_d_min}\n'
+                   f'Hamming border for           (n = {n}, k = {k}) => d_min = {hamming_d_min}\n'
+                   f'Varshamov-Gilbert border for (n = {n}, k = {k}) => d_min = {vg_d_min}\n'
+                   f'Varshamov-Gilbert (linear) border for (n = {n}, k = {k}) => d_min = {vg_d_min_linear}\n')
         except BadInputException as e:
-            print(f'warning: {e.message}')
+            logger(f'warning: {e.message}')
+        except Exception as e:
+            logger(f'Unexpected error (borders, find d_min by N & K): {e}')
 
         try:
             border_n_d = safe_get_numbers_from_file(file_name_n_d, 'N and D_min for border task')
@@ -95,16 +100,20 @@ def main():
             vg_k_max_linear = vg_find_k_by_n_d_linear(n, d)
             hamming_k = hamming_find_k_by_n_d(n, d)
 
-            print(f'Greismer border for          (n = {n}, d_min = {d}) => k = {gr_k_max}\n'
-                  f'Hamming border for           (n = {n}, d_min = {d}) => k = {hamming_k}\n'
-                  f'Varshamov-Gilbert border for (n = {n}, d_min = {d}) => k = {vg_k_max}\n'
-                  f'Varshamov-Gilbert (linear) border for (n = {n}, d_min = {d}) => k = {vg_k_max_linear}\n')
+            logger(f'Greismer border for          (n = {n}, d_min = {d}) => k = {gr_k_max}\n'
+                   f'Hamming border for           (n = {n}, d_min = {d}) => k = {hamming_k}\n'
+                   f'Varshamov-Gilbert border for (n = {n}, d_min = {d}) => k = {vg_k_max}\n'
+                   f'Varshamov-Gilbert (linear) border for (n = {n}, d_min = {d}) => k = {vg_k_max_linear}\n')
         except BadInputException as e:
-            print(f'warning: {e.message}')
+            logger(f'warning: {e.message}')
+        except Exception as e:
+            logger(f'Unexpected error (borders, find k by N & D_min): {e}')
 
     except TaskException as e:
-        print(f'error: {e.message}')
+        logger(f'error: {e.message}')
+    except Exception as e:
+        logger(f'Unexpected error: {e}')
 
 
 if __name__ == '__main__':
-    main()
+    main(print)
