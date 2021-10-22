@@ -59,7 +59,7 @@ def main(logger):
                    f'standard table (syndromes): ')
 
             for syndrome in standard_table:
-                binary_index = format(syndrome, f'0{len(h_matrix)}b')[::-1]
+                binary_index = format(syndrome, f'0{len(h_matrix)}b')
                 logger(f'T[{binary_index}] = {to_line(standard_table[syndrome])}')
         except TaskException as e:
             logger(f'error: {e.message}')
