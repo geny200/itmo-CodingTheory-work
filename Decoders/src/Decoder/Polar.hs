@@ -1,4 +1,4 @@
-module Decoder.Polar (oddTrim, s, evenTrim, decode, sgn) where
+module Decoder.Polar (evenTrim, s, oddTrim, decode, sgn) where
 
 import Chanel.BEC.Probabilities (frozenBits, toProbability)
 
@@ -7,15 +7,24 @@ decodeBit v
   | v <= 0 = True
   | otherwise = False
 
-oddTrim :: [a] -> [a]
-oddTrim [] = []
-oddTrim (x : _ : xs) = x : oddTrim xs
-oddTrim (x : _) = [x]
-
 evenTrim :: [a] -> [a]
 evenTrim [] = []
-evenTrim (_ : x : xs) = x : evenTrim xs
-evenTrim (_ : x) = x
+evenTrim (x : _ : xs) = x : evenTrim xs
+evenTrim (x : _) = [x]
+
+oddTrim :: [a] -> [a]
+oddTrim [] = []
+oddTrim (_ : x : xs) = x : oddTrim xs
+oddTrim (_ : x) = x
+
+xor' :: Bool -> Bool -> Bool
+xor' True False = True
+xor' False True = True
+xor' _ _ = False
+
+xorV :: [Bool] -> [Bool] -> [Bool]
+xorV (x : xs) (y : ys) = (x `xor'` y) : xorV xs ys
+xorV _ _ = []
 
 sgn :: (Num a, Ord a) => a -> a
 sgn x
@@ -31,12 +40,12 @@ s ::
 s _ _ [x] = x
 s u i word =
   let (divI, modI) = i `quotRem` 2
-      a = s u divI (oddTrim word)
-      b = s u divI (evenTrim word)
+      a = s (evenTrim u `xorV` oddTrim u) divI (evenTrim word)
+      b = s (oddTrim u) divI (oddTrim word)
    in if modI == 0
         then sgn a * sgn b * min (abs a) (abs b)
         else
-          if u !! (length u - (i -1) - 1)
+          if u !! (i - 1)
             then - a + b
             else a + b
 
@@ -53,7 +62,7 @@ decodeStep n word frozen
      in False : previous
   | otherwise =
     let previous = decodeStep (n - 1) word frozen
-        currentBit = decodeBit (s previous n word)
+        currentBit = decodeBit (s (reverse previous) n word)
      in currentBit : previous
 
 decode :: (Ord a, Num a) => Int -> Int -> [a] -> [Int]
