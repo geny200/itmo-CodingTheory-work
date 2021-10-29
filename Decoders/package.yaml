@@ -1,0 +1,48 @@
+name: Decoders
+version: 0.1.0.0
+github: "geny200/itmo-CodingTheory-work/Decoders"
+license: GPL-3
+author: "Geny200"
+copyright: "2021 Geny200"
+
+extra-source-files:
+  - README.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description: Please see the README on GitHub at <https://github.com/geny200/itmo-CodingTheory-work/Decoders#readme>
+
+dependencies:
+  - base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+
+executables:
+  Decoders-exe:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - Decoders
+
+tests:
+  Decoders-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - Decoders
+      - QuickCheck
+      - hspec
